@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mis Tareas</title>
+  <meta name="description" content="Gestor de tareas con Google Calendar" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#1D9E75" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Mis Tareas" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- NAVEGACIÓN -->
+  <nav class="navbar">
+    <span class="nav-logo">✅ Mis Tareas</span>
+    <div class="nav-links">
+      <button onclick="showTab('tareas')" id="tab-tareas" class="nav-btn active">Tareas</button>
+      <button onclick="showTab('informe')" id="tab-informe" class="nav-btn">Informe</button>
+    </div>
+    <button onclick="signIn()" id="btn-auth" class="btn-auth">Conectar Google</button>
+  </nav>
+
+  <!-- PESTAÑA: TAREAS -->
+  <main id="view-tareas" class="view active">
+    <div class="container">
+
+      <!-- FORMULARIO -->
+      <section class="card form-card">
+        <h2 class="section-title">Nueva tarea</h2>
+        <div class="form-grid">
+          <div class="field full">
+            <label for="inp-title">Tarea *</label>
+            <input type="text" id="inp-title" placeholder="¿Qué hay que hacer?" />
+          </div>
+          <div class="field">
+            <label for="inp-prior">Prioridad</label>
+            <select id="inp-prior">
+              <option value="alta">Alta</option>
+              <option value="media" selected>Media</option>
+              <option value="baja">Baja</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="inp-cat">Categoría</label>
+            <select id="inp-cat">
+              <option value="trabajo">Trabajo</option>
+              <option value="estudio">Estudio</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="inp-deadline">Fecha límite</label>
+            <input type="date" id="inp-deadline" />
+          </div>
+          <div class="field">
+            <label for="inp-dodate">Fecha a realizar</label>
+            <input type="date" id="inp-dodate" />
+          </div>
+          <div class="field">
+            <label for="inp-start">Hora inicio</label>
+            <input type="time" id="inp-start" />
+          </div>
+          <div class="field">
+            <label for="inp-end">Hora fin</label>
+            <input type="time" id="inp-end" />
+          </div>
+        </div>
+        <button class="btn-primary" onclick="addTask()">+ Agregar tarea</button>
+        <p id="cal-status" class="cal-status"></p>
+      </section>
+
+      <!-- FILTROS -->
+      <div class="filters">
+        <button class="filter-btn active" onclick="setFilter('todas', this)">Todas</button>
+        <button class="filter-btn" onclick="setFilter('trabajo', this)">Trabajo</button>
+        <button class="filter-btn" onclick="setFilter('estudio', this)">Estudio</button>
+        <button class="filter-btn" onclick="setFilter('pendiente', this)">Pendientes</button>
+        <button class="filter-btn" onclick="setFilter('en progreso', this)">En progreso</button>
+        <button class="filter-btn" onclick="setFilter('completada', this)">Completadas</button>
+      </div>
+
+      <!-- PROGRESO -->
+      <div class="progress-wrap">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="pbar"></div>
+        </div>
+        <span class="progress-label" id="plabel">0 de 0 completadas</span>
+      </div>
+
+      <!-- LISTA DE TAREAS -->
+      <section id="tasks-list"></section>
+    </div>
+  </main>
+
+  <!-- PESTAÑA: INFORME -->
+  <main id="view-informe" class="view">
+    <div class="container">
+      <section class="card">
+        <h2 class="section-title">Informe semanal</h2>
+        <div id="informe-content"></div>
+        <button class="btn-primary" style="margin-top:1rem" onclick="sendWeeklyReport()">
+          📧 Enviar informe por Gmail
+        </button>
+      </section>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
