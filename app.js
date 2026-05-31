@@ -1,6 +1,6 @@
 // ── CONFIGURACIÓN GOOGLE ──────────────────────────────────────────────────────
 // Reemplazá estos valores con los tuyos (te los voy a indicar en la Etapa 4)
-const GOOGLE_CLIENT_ID = 'TU_CLIENT_ID_AQUI';
+const GOOGLE_CLIENT_ID = '219184382354-l36ao2j9t122s362j21lc9ldvuvieher.apps.googleusercontent.com';
 const SCOPES = [
   'https://www.googleapis.com/auth/calendar.events',
   'https://www.googleapis.com/auth/gmail.send'
