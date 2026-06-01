@@ -102,12 +102,14 @@ async function sendWeeklyReport() {
   }
 
   const report = buildReport();
+  const recipient = 'mfontf2015@gmail.com';
   const subject = `Informe semanal de tareas — ${new Date().toLocaleDateString('es-AR')}`;
   const body = buildEmailBody(report);
 
   const email = [
     'Content-Type: text/html; charset=utf-8',
     'MIME-Version: 1.0',
+    `To: ${recipient}`,
     `Subject: ${subject}`,
     '',
     body
