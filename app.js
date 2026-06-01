@@ -1,15 +1,25 @@
 // ── CONFIGURACIÓN GOOGLE ──────────────────────────────────────────────────────
-// Reemplazá estos valores con los tuyos (te los voy a indicar en la Etapa 4) 
 const GOOGLE_CLIENT_ID = '219184382354-l36ao2j9t122s362j21lc9ldvuvieher.apps.googleusercontent.com';
 const SCOPES = [
   'https://www.googleapis.com/auth/calendar.events',
   'https://www.googleapis.com/auth/gmail.send'
 ].join(' ');
 
+// ── CONFIGURACIÓN FIREBASE ────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyDXprqEP_0RjiNtbzlM03Owcm6wQexmfSE",
+  authDomain: "mis-tareas-d19c3.firebaseapp.com",
+  projectId: "mis-tareas-d19c3",
+  storageBucket: "mis-tareas-d19c3.firebasestorage.app",
+  messagingSenderId: "532398894195",
+  appId: "1:532398894195:web:53d25e378171f553c7ce06"
+};
+
 // ── ESTADO ────────────────────────────────────────────────────────────────────
-let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+let tasks = [];
 let filterVal = 'todas';
 let accessToken = null;
+let db = null;
 
 // ── GOOGLE AUTH ───────────────────────────────────────────────────────────────
 function signIn() {
@@ -157,8 +167,7 @@ async function addTask() {
     completedAt: null
   };
 
-  tasks.push(task);
-  save();
+  await saveTask(task);
 
   // Limpiar formulario
   ['inp-title','inp-deadline','inp-dodate','inp-start','inp-end'].forEach(id => {
@@ -181,33 +190,23 @@ async function addTask() {
 }
 
 function deleteTask(id) {
-  tasks = tasks.filter(t => t.id !== id);
-  save();
-  render();
+  const t = tasks.find(t => t.id === id);
+  if (t && t._docId) removeTask(t._docId);
 }
 
 function toggleDone(id) {
   const t = tasks.find(t => t.id === id);
-  if (!t) return;
-  if (t.status !== 'completada') {
-    t.status = 'completada';
-    t.completedAt = new Date().toISOString();
-  } else {
-    t.status = 'pendiente';
-    t.completedAt = null;
-  }
-  save();
-  render();
+  if (!t || !t._docId) return;
+  const newStatus = t.status !== 'completada' ? 'completada' : 'pendiente';
+  const completedAt = newStatus === 'completada' ? new Date().toISOString() : null;
+  updateTask(t._docId, { status: newStatus, completedAt });
 }
 
 function changeStatus(id, val) {
   const t = tasks.find(t => t.id === id);
-  if (!t) return;
-  t.status = val;
-  if (val === 'completada' && !t.completedAt) t.completedAt = new Date().toISOString();
-  if (val !== 'completada') t.completedAt = null;
-  save();
-  render();
+  if (!t || !t._docId) return;
+  const completedAt = val === 'completada' ? new Date().toISOString() : null;
+  updateTask(t._docId, { status: val, completedAt });
 }
 
 function setFilter(v, el) {
@@ -342,7 +341,7 @@ function renderReport() {
 }
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
-function save()   { localStorage.setItem('tasks', JSON.stringify(tasks)); }
+function save() {} // Las tareas se guardan en Firebase automáticamente
 function today()  { return new Date().toISOString().split('T')[0]; }
 function cap(s)   { return s.charAt(0).toUpperCase() + s.slice(1); }
 function fmt(d)   { if (!d) return ''; const [y,m,dd] = d.split('-'); return `${dd}/${m}/${y}`; }
@@ -354,6 +353,40 @@ function dateStatus(d) {
   return diff <= 3 ? 'proximo' : '';
 }
 
+// ── FIREBASE ──────────────────────────────────────────────────────────────────
+async function initFirebase() {
+  const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+  const { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+
+  const app = initializeApp(firebaseConfig);
+  db = getFirestore(app);
+
+  // Escuchar cambios en tiempo real
+  const colRef = collection(db, 'tasks');
+  onSnapshot(colRef, (snapshot) => {
+    tasks = snapshot.docs.map(d => ({ ...d.data(), _docId: d.id }));
+    render();
+  });
+
+  window._fs = { collection, addDoc, updateDoc, deleteDoc, doc, colRef };
+}
+
+async function saveTask(task) {
+  const { collection, addDoc } = window._fs;
+  const colRef = window._fs.colRef;
+  await addDoc(colRef, task);
+}
+
+async function updateTask(docId, data) {
+  const { doc, updateDoc } = window._fs;
+  await updateDoc(doc(db, 'tasks', docId), data);
+}
+
+async function removeTask(docId) {
+  const { doc, deleteDoc } = window._fs;
+  await deleteDoc(doc(db, 'tasks', docId));
+}
+
 // ── SERVICE WORKER ────────────────────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -363,4 +396,4 @@ if ('serviceWorker' in navigator) {
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 checkAuth();
-render();
+initFirebase();
