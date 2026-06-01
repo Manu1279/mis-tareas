@@ -82,6 +82,8 @@ input:focus, select:focus { border-color: var(--green); }
 .badge-baja { background: var(--green-light); color: var(--green-dark); }
 .badge-trabajo { background: var(--blue-light); color: var(--blue); }
 .badge-estudio { background: var(--purple-light); color: var(--purple); }
+.badge-familia { background: #E1F5EE; color: #0F6E56; }
+.badge-personal { background: #FAEEDA; color: #854F0B; }
 .date-tag { font-size: 11px; color: var(--text-muted); }
 .date-tag.vencido { color: var(--red); font-weight: 500; }
 .date-tag.proximo { color: var(--amber); font-weight: 500; }
