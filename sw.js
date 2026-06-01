@@ -1,4 +1,4 @@
-const CACHE = 'mis-tareas-v1';
+const CACHE = 'mis-tareas-v2';
 const ASSETS = ['/', '/index.html', '/style.css', '/app.js', '/manifest.json'];
 
 self.addEventListener('install', e => {
@@ -16,6 +16,13 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  const url = new URL(e.request.url);
+  // No interceptar Firebase ni Google APIs
+  if (url.hostname.includes('firebase') ||
+      url.hostname.includes('google') ||
+      url.hostname.includes('gstatic')) {
+    return;
+  }
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request))
   );
