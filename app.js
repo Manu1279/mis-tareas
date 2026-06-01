@@ -96,43 +96,47 @@ async function createCalendarEvent(task) {
 
 // ── GMAIL ─────────────────────────────────────────────────────────────────────
 async function sendWeeklyReport() {
+async function sendWeeklyReport() {
   if (!accessToken) {
     alert('Conectá tu cuenta de Google primero.');
     return;
   }
 
   const report = buildReport();
-  const recipient = 'mfontf2015@gmail.com';
   const subject = `Informe semanal de tareas — ${new Date().toLocaleDateString('es-AR')}`;
   const body = buildEmailBody(report);
+  const to = 'mfontf2015@gmail.com';
 
- const email = [
-  'Content-Type: text/html; charset=utf-8',
-  'MIME-Version: 1.0',
-  'To: mfontf2015@gmail.com',
-  `Subject: ${subject}`,
-  '',
-  body
-].join('\n');
-  
- const encoded = btoa(encodeURIComponent(email).replace(/%([0-9A-F]{2})/g,
-  (match, p1) => String.fromCharCode(parseInt(p1, 16))))
-  .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const messageParts = [
+    `To: ${to}`,
+    'Content-Type: text/html; charset=utf-8',
+    'MIME-Version: 1.0',
+    `Subject: =?utf-8?B?${btoa(unescape(encodeURIComponent(subject)))}?=`,
+    '',
+    body
+  ];
+
+  const message = messageParts.join('\r\n');
+  const encoded = btoa(unescape(encodeURIComponent(message)))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
   const res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
     method: 'POST',
-    headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+    headers: {
+      Authorization: 'Bearer ' + accessToken,
+      'Content-Type': 'application/json'
+    },
     body: JSON.stringify({ raw: encoded })
   });
 
   if (res.ok) {
     alert('✅ Informe enviado a tu Gmail.');
   } else {
-    alert('❌ No se pudo enviar. Reconectá tu cuenta de Google.');
+    const err = await res.json();
+    alert('❌ Error: ' + JSON.stringify(err));
   }
 }
-
-function buildEmailBody(r) {
+  function buildEmailBody(r) {
   const rows = r.pending.map(t =>
     `<tr><td>${t.title}</td><td>${t.cat}</td><td>${t.prior}</td><td>${t.deadline ? fmt(t.deadline) : '—'}</td></tr>`
   ).join('');
