@@ -106,15 +106,15 @@ async function sendWeeklyReport() {
   const subject = `Informe semanal de tareas — ${new Date().toLocaleDateString('es-AR')}`;
   const body = buildEmailBody(report);
 
-  const email = [
-    'Content-Type: text/html; charset=utf-8',
-    'MIME-Version: 1.0',
-    `To: ${recipient}`,
-    `Subject: ${subject}`,
-    '',
-    body
-  ].join('\n');
-
+ const email = [
+  'Content-Type: text/html; charset=utf-8',
+  'MIME-Version: 1.0',
+  'To: mfontf2015@gmail.com',
+  `Subject: ${subject}`,
+  '',
+  body
+].join('\n');
+  
   const encoded = btoa(unescape(encodeURIComponent(email)))
     .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
