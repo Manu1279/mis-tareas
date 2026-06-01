@@ -115,8 +115,9 @@ async function sendWeeklyReport() {
   body
 ].join('\n');
   
-  const encoded = btoa(unescape(encodeURIComponent(email)))
-    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+ const encoded = btoa(encodeURIComponent(email).replace(/%([0-9A-F]{2})/g,
+  (match, p1) => String.fromCharCode(parseInt(p1, 16))))
+  .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
   const res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
     method: 'POST',
